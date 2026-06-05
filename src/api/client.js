@@ -15,7 +15,6 @@ class ApiError extends Error {
 
 const defaultOptions = {
   timeout: 20000,
-  retry: false,
 };
 
 const apiClient = async (
@@ -26,8 +25,8 @@ const apiClient = async (
     body,
     params,
     timeout = defaultOptions.timeout,
+    includeAuth = true,
   } = {},
-  retry = defaultOptions.retry
 ) => {
   const accessToken = localStorage.getItem("accessToken");
   const normalizedMethod = method.toUpperCase();
@@ -53,7 +52,7 @@ const apiClient = async (
     response = await fetch(`${API_BASE}${url}${queryString}`, {
       method: normalizedMethod,
       headers: {
-        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        ...(includeAuth && accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         ...(!isFormData && hasBody ? { "Content-Type": "application/json" } : {}),
         ...headers,
       },
@@ -86,7 +85,9 @@ const apiClient = async (
       const text = await response.clone().text();
       data = text || null;
     }
-  } catch {}
+  } catch {
+    data = null;
+  }
 
   // TODO: VITE_SERVER_URL이 비어 있으면 초기화 단계에서 바로 감지하도록 검증 추가
   // TODO: refresh 토큰 재발급을 붙일 계획이 없다면 retry 인자 제거 검토

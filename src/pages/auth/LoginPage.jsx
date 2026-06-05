@@ -6,8 +6,9 @@ import Button from "../../components/common/Button";
 import FormField from "../../components/common/FormField";
 import Input from "../../components/common/Input";
 import {
+  fetchGoogleAuthorizeUrlApi,
   fetchKakaoAuthorizeUrlApi,
-  linkKakaoAccountApi,
+  linkOAuthAccountApi,
   sendEmailVerificationApi,
 } from "../../features/auth/authApi";
 import {
@@ -16,11 +17,19 @@ import {
 } from "../../features/auth/kakaoLinkStorage";
 import { useAuth } from "../../features/auth/useAuth";
 
+const PROVIDER_LABELS = {
+  KAKAO: "카카오",
+  GOOGLE: "Google",
+};
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login, loading } = useAuth();
   const pendingKakaoLink = useMemo(() => getPendingKakaoLink(), []);
+  const pendingOAuthProvider = (pendingKakaoLink?.provider || "KAKAO").toUpperCase();
+  const pendingOAuthProviderLabel =
+    PROVIDER_LABELS[pendingOAuthProvider] || pendingOAuthProvider;
   const initialEmail = searchParams.get("email") || pendingKakaoLink?.email || "";
   const redirectTarget = searchParams.get("redirect");
   const safeRedirectTarget =
@@ -101,7 +110,10 @@ export default function LoginPage() {
       await login(form);
 
       if (pendingKakaoLink?.linkToken) {
-        await linkKakaoAccountApi({ linkToken: pendingKakaoLink.linkToken });
+        await linkOAuthAccountApi({
+          provider: pendingOAuthProvider,
+          linkToken: pendingKakaoLink.linkToken,
+        });
         clearPendingKakaoLink();
       }
 
@@ -122,7 +134,7 @@ export default function LoginPage() {
         setErrors({
           common:
             error?.message ||
-            "로그인은 성공했지만 카카오 계정 연동에 실패했어요. 다시 시도해 주세요.",
+            `로그인은 성공했지만 ${pendingOAuthProviderLabel} 계정 연동에 실패했어요. 다시 시도해 주세요.`,
         });
         return;
       }
@@ -133,6 +145,27 @@ export default function LoginPage() {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleStartOAuthLogin = async ({ providerLabel, fetchAuthorizeUrl }) => {
+    try {
+      setErrors((prev) => ({ ...prev, common: "" }));
+
+      const result = await fetchAuthorizeUrl();
+      if (!result?.authorizeUrl) {
+        throw new Error(`${providerLabel} 로그인 URL을 불러오지 못했습니다.`);
+      }
+
+      window.location.href = result.authorizeUrl;
+    } catch (error) {
+      setErrors((prev) => ({
+        ...prev,
+        common:
+          error instanceof ApiError
+            ? error.message
+            : error?.message || `${providerLabel} 로그인을 시작하지 못했습니다.`,
+      }));
     }
   };
 
@@ -174,9 +207,12 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {pendingKakaoLink?.linkToken ? (
               <div className="border border-yellow-200 bg-[#fff9d9] px-4 py-4 text-left text-sm text-[#5b4300]">
-                <p className="font-semibold">이 계정에 카카오 연동 대기 상태가 있어요.</p>
+                <p className="font-semibold">
+                  이 계정에 {pendingOAuthProviderLabel} 연동 대기 상태가 있어요.
+                </p>
                 <p className="mt-1">
-                  기존 계정으로 로그인하면 카카오 연동을 자동으로 완료할게요.
+                  기존 계정으로 로그인하면 {pendingOAuthProviderLabel} 연동을 자동으로
+                  완료할게요.
                 </p>
               </div>
             ) : null}
@@ -271,26 +307,12 @@ export default function LoginPage() {
             type="button"
             size="lg"
             className="w-full gap-3 border border-[#ead000] bg-[#FEE500] text-[#191919] shadow-[0_6px_18px_rgba(0,0,0,0.08)] hover:bg-[#FADA00] hover:brightness-100"
-            onClick={async () => {
-              try {
-                setErrors((prev) => ({ ...prev, common: "" }));
-
-                const result = await fetchKakaoAuthorizeUrlApi();
-                if (!result?.authorizeUrl) {
-                  throw new Error("카카오 로그인 URL을 불러오지 못했습니다.");
-                }
-
-                window.location.href = result.authorizeUrl;
-              } catch (error) {
-                setErrors((prev) => ({
-                  ...prev,
-                  common:
-                    error instanceof ApiError
-                      ? error.message
-                      : error?.message || "카카오 로그인을 시작하지 못했습니다.",
-                }));
-              }
-            }}
+            onClick={() =>
+              handleStartOAuthLogin({
+                providerLabel: "카카오",
+                fetchAuthorizeUrl: fetchKakaoAuthorizeUrlApi,
+              })
+            }
           >
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#191919]/10">
               <svg
@@ -306,6 +328,40 @@ export default function LoginPage() {
               </svg>
             </span>
             <span>카카오로 시작하기</span>
+          </Button>
+
+          <Button
+            type="button"
+            size="lg"
+            className="mt-3 w-full gap-3 border border-gray-200 bg-white text-slate-800 shadow-[0_6px_18px_rgba(15,23,42,0.08)] hover:bg-gray-50 hover:brightness-100"
+            onClick={() =>
+              handleStartOAuthLogin({
+                providerLabel: "Google",
+                fetchAuthorizeUrl: fetchGoogleAuthorizeUrlApi,
+              })
+            }
+          >
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white">
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
+                <path
+                  fill="#4285F4"
+                  d="M21.6 12.23c0-.78-.07-1.53-.2-2.23H12v4.22h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.33 2.98-7.52Z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 22c2.7 0 4.96-.9 6.62-2.44l-3.24-2.51c-.9.6-2.04.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.06v2.59A9.99 9.99 0 0 0 12 22Z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M6.41 13.89a6.01 6.01 0 0 1 0-3.78V7.52H3.06a9.99 9.99 0 0 0 0 8.96l3.35-2.59Z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.98c1.47 0 2.79.51 3.83 1.5l2.87-2.87C16.95 3 14.7 2 12 2A9.99 9.99 0 0 0 3.06 7.52l3.35 2.59C7.2 7.74 9.4 5.98 12 5.98Z"
+                />
+              </svg>
+            </span>
+            <span>Google로 시작하기</span>
           </Button>
 
           <div className="mt-12 text-center">

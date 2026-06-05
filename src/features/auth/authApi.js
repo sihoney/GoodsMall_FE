@@ -2,24 +2,59 @@ import { apiClient } from "../../api/client";
 
 const unwrapResponse = (response) => response?.data?.data ?? null;
 
-const API_BASE = import.meta.env.VITE_SERVER_URL ?? "";
+const normalizeOAuthProvider = (provider) => String(provider || "").toLowerCase();
 
-async function fetchKakaoAuthorizeUrlApi() {
-  const response = await apiClient("/api/auth/oauth/kakao/authorize");
+async function fetchOAuthAuthorizeUrlApi(provider) {
+  const normalizedProvider = normalizeOAuthProvider(provider);
+  const response = await apiClient(
+    `/api/auth/oauth/${normalizedProvider}/authorize`,
+  );
+
   return unwrapResponse(response);
 }
 
-async function fetchKakaoLinkAuthorizeUrlApi() {
-  const response = await apiClient("/api/auth/oauth/kakao/link/authorize-url");
+async function fetchOAuthLinkAuthorizeUrlApi(provider) {
+  const normalizedProvider = normalizeOAuthProvider(provider);
+  const response = await apiClient(
+    `/api/auth/oauth/${normalizedProvider}/link/authorize-url`,
+  );
+
   return unwrapResponse(response);
 }
 
-async function fetchKakaoOAuthResultApi({ resultKey }) {
-  const response = await apiClient("/api/auth/oauth/kakao/result", {
+async function fetchOAuthResultApi({ provider, resultKey }) {
+  const normalizedProvider = normalizeOAuthProvider(provider);
+  const response = await apiClient(`/api/auth/oauth/${normalizedProvider}/result`, {
     params: { resultKey },
   });
 
   return unwrapResponse(response);
+}
+
+async function linkOAuthAccountApi({ provider, linkToken }) {
+  const normalizedProvider = normalizeOAuthProvider(provider);
+  const response = await apiClient(`/api/auth/oauth/${normalizedProvider}/link`, {
+    method: "POST",
+    body: { linkToken },
+  });
+
+  return unwrapResponse(response);
+}
+
+async function fetchKakaoAuthorizeUrlApi() {
+  return fetchOAuthAuthorizeUrlApi("KAKAO");
+}
+
+async function fetchGoogleAuthorizeUrlApi() {
+  return fetchOAuthAuthorizeUrlApi("GOOGLE");
+}
+
+async function fetchKakaoLinkAuthorizeUrlApi() {
+  return fetchOAuthLinkAuthorizeUrlApi("KAKAO");
+}
+
+async function fetchKakaoOAuthResultApi({ resultKey }) {
+  return fetchOAuthResultApi({ provider: "KAKAO", resultKey });
 }
 
 async function loginApi({ email, password }) {
@@ -40,7 +75,7 @@ async function signupApi({
   profileImageKey = null,
   role = "USER",
 }) {
-  const response = await apiClient("/api/auth", {
+  const response = await apiClient("/api/members", {
     method: "POST",
     body: {
       email,
@@ -98,12 +133,8 @@ async function getMyInfoApi() {
   return unwrapResponse(response);
 }
 
-async function logoutApi(memberId) {
-  if (!memberId) {
-    return null;
-  }
-
-  const response = await apiClient(`/api/auth/logout/${memberId}`, {
+async function logoutApi() {
+  const response = await apiClient("/api/auth/logout/current", {
     method: "POST",
   });
 
@@ -111,21 +142,21 @@ async function logoutApi(memberId) {
 }
 
 async function linkKakaoAccountApi({ linkToken }) {
-  const response = await apiClient("/api/auth/oauth/kakao/link", {
-    method: "POST",
-    body: { linkToken },
-  });
-
-  return unwrapResponse(response);
+  return linkOAuthAccountApi({ provider: "KAKAO", linkToken });
 }
 
 export {
   confirmPasswordResetApi,
   confirmEmailVerificationApi,
+  fetchGoogleAuthorizeUrlApi,
   fetchKakaoAuthorizeUrlApi,
   fetchKakaoLinkAuthorizeUrlApi,
   fetchKakaoOAuthResultApi,
+  fetchOAuthAuthorizeUrlApi,
+  fetchOAuthLinkAuthorizeUrlApi,
+  fetchOAuthResultApi,
   getMyInfoApi,
+  linkOAuthAccountApi,
   linkKakaoAccountApi,
   loginApi,
   logoutApi,

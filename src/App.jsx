@@ -7,6 +7,7 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import KakaoLinkRequiredPage from "./pages/auth/KakaoLinkRequiredPage";
 import KakaoOAuthCallbackPage from "./pages/auth/KakaoOAuthCallbackPage";
 import LoginPage from "./pages/auth/LoginPage";
+import OAuthCallbackPage from "./pages/auth/OAuthCallbackPage";
 import PasswordResetPage from "./pages/auth/PasswordResetPage";
 import SignupPage from "./pages/auth/SignupPage";
 import SignupPendingVerificationPage from "./pages/auth/SignupPendingVerificationPage";
@@ -73,6 +74,11 @@ const router = createBrowserRouter([
       },
       { path: "email-verification", element: <EmailVerificationPage /> },
       { path: "auth/kakao/callback", element: <KakaoOAuthCallbackPage /> },
+      {
+        path: "auth/google/callback",
+        element: <OAuthCallbackPage provider="GOOGLE" />,
+      },
+      { path: "auth/oauth/link-required", element: <KakaoLinkRequiredPage /> },
       { path: "auth/kakao/link-required", element: <KakaoLinkRequiredPage /> },
       { path: "cart", element: <CartPage /> },
       { path: "deposits", element: <DepositPage /> },

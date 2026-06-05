@@ -8,6 +8,38 @@ import {
   setPendingKakaoLink,
 } from "../../features/auth/kakaoLinkStorage";
 
+const PROVIDER_META = {
+  KAKAO: {
+    label: "카카오",
+    accountLabel: "카카오 계정",
+    loginDescription:
+      "카카오 인증은 완료되었지만 아직 카카오 계정이 GoodsMall 회원 계정과 연결되어 있지 않아요.",
+    nicknameLabel: "카카오 닉네임",
+    mark: "K",
+    markClass: "bg-[#FEE500] text-[#3C1E1E]",
+  },
+  GOOGLE: {
+    label: "Google",
+    accountLabel: "Google 계정",
+    loginDescription:
+      "Google 인증은 완료되었지만 아직 Google 계정이 GoodsMall 회원 계정과 연결되어 있지 않아요.",
+    nicknameLabel: "Google 프로필",
+    mark: "G",
+    markClass: "border border-gray-200 bg-white text-[#4285F4]",
+  },
+};
+
+function getProviderMeta(provider) {
+  return PROVIDER_META[provider] || {
+    label: provider,
+    accountLabel: `${provider} 계정`,
+    loginDescription: `${provider} 인증은 완료되었지만 아직 GoodsMall 회원 계정과 연결되어 있지 않아요.`,
+    nicknameLabel: `${provider} 프로필`,
+    mark: provider.slice(0, 1),
+    markClass: "bg-blue-100 text-blue-700",
+  };
+}
+
 function DecorativeFoodIcon({ label }) {
   return (
     <div className="flex h-12 w-12 items-center justify-center border border-blue-200/70 bg-white/70 text-lg font-black text-blue-400 shadow-sm">
@@ -20,16 +52,22 @@ export default function KakaoLinkRequiredPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const storedPendingLink = getPendingKakaoLink();
+  const provider = (
+    searchParams.get("provider") ||
+    storedPendingLink?.provider ||
+    "KAKAO"
+  ).toUpperCase();
+  const providerMeta = getProviderMeta(provider);
 
   const pendingLink = useMemo(
     () => ({
       linkToken: searchParams.get("linkToken") || storedPendingLink?.linkToken || "",
-      provider: searchParams.get("provider") || "KAKAO",
+      provider,
       email: searchParams.get("email") || storedPendingLink?.email || "",
       nickname: searchParams.get("nickname") || storedPendingLink?.nickname || "",
       providerUserId: searchParams.get("providerUserId") || storedPendingLink?.providerUserId || "",
     }),
-    [searchParams, storedPendingLink]
+    [provider, searchParams, storedPendingLink]
   );
 
   useEffect(() => {
@@ -78,12 +116,14 @@ export default function KakaoLinkRequiredPage() {
 
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative flex h-48 w-48 flex-col items-center justify-center bg-white p-8 text-center shadow-[0_24px_70px_rgba(37,99,235,0.18)]">
-                <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#FEE500] text-3xl font-black text-[#3C1E1E] shadow-sm">
-                  K
+                <div
+                  className={`mb-4 flex h-20 w-20 items-center justify-center rounded-full text-3xl font-black shadow-sm ${providerMeta.markClass}`}
+                >
+                  {providerMeta.mark}
                 </div>
 
                 <div className="flex items-center gap-3 text-blue-700">
-                  <span className="text-xl font-black">Kakao</span>
+                  <span className="text-xl font-black">{providerMeta.label}</span>
                   <span className="h-1.5 w-10 rounded-full bg-blue-200" />
                   <span className="text-xl font-black text-slate-700">Me</span>
                 </div>
@@ -99,26 +139,25 @@ export default function KakaoLinkRequiredPage() {
         <section className="space-y-6">
           <div className="space-y-3">
             <p className="text-xs font-black uppercase tracking-[0.28em] text-blue-600">
-              카카오 계정 연동
+              {providerMeta.accountLabel} 연동
             </p>
             <h2 className="text-3xl font-black leading-tight tracking-tight">
-              카카오 계정 연동이
+              {providerMeta.label} 계정 연동이
               <br />
               필요해요
             </h2>
             <p className="text-sm font-medium leading-7 text-gray-500">
-              카카오 인증은 완료되었지만 아직 카카오 계정이 GoodsMall 회원 계정과 연결되어 있지
-              않아요.
+              {providerMeta.loginDescription}
             </p>
           </div>
 
           {pendingLink.nickname ? (
             <div className="border border-blue-200/80 bg-white/70 p-4 shadow-sm backdrop-blur">
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-blue-600">
-                카카오 계정
+                {providerMeta.accountLabel}
               </p>
               <p className="mt-2 text-xs font-medium text-gray-500">
-                카카오 닉네임: {pendingLink.nickname}
+                {providerMeta.nicknameLabel}: {pendingLink.nickname}
               </p>
             </div>
           ) : null}
@@ -157,7 +196,7 @@ export default function KakaoLinkRequiredPage() {
         <footer className="mt-auto pt-12 text-center">
           <div className="bg-white/65 p-4 text-left shadow-sm backdrop-blur">
             <p className="text-xs font-medium leading-6 text-gray-500">
-              한 번 연결해두면 다음부터는 카카오로 바로 로그인할 수 있어요.
+              한 번 연결해두면 다음부터는 {providerMeta.label}로 바로 로그인할 수 있어요.
             </p>
           </div>
 
