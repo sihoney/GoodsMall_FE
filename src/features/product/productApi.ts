@@ -1,8 +1,27 @@
 ﻿import { apiClient } from "../../api/client";
+import {
+  createCategoryByAdmin as createGeneratedCategoryByAdmin,
+  createCategoryBySeller as createGeneratedCategoryBySeller,
+  createProduct as createGeneratedProduct,
+  deleteCategory as deleteGeneratedCategory,
+  deleteImage as deleteGeneratedImage,
+  findProduct,
+  getCategories as getGeneratedCategories,
+  getChildCategories as getGeneratedChildCategories,
+  reindexAll as reindexGeneratedAll,
+  updateCategoryByAdmin as updateGeneratedCategoryByAdmin,
+  updateCategoryBySeller as updateGeneratedCategoryBySeller,
+} from "../../api/generated/product/product";
 
 const MAX_PRODUCT_IMAGE_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_PRODUCT_IMAGE_COUNT = 5;
 const MAX_PRODUCT_IMAGE_TOTAL_SIZE = 30 * 1024 * 1024;
+
+type LooseRecord = Record<string, any>;
+type ProductQueryParams = LooseRecord & { sort?: unknown };
+type CategoryQueryOptions = {
+  depth?: number;
+};
 
 const ensureValidImageSize = (file) => {
   if (!file) {
@@ -77,9 +96,10 @@ const toUiCategory = (category) => ({
   createdAt: category.createdAt ?? null,
 });
 
-async function getProductsApi(params = {}) {
+// 수동 호출 유지: 생성 client의 pageable query 객체가 [object Object]로 직렬화될 수 있습니다.
+async function getProductsApi(params: ProductQueryParams = {}) {
   const { sort: _sort, ...safeParams } = params;
-  const response = await apiClient("/api/products", {
+  const response = await apiClient<LooseRecord>("/api/products", {
     params: safeParams,
   });
 
@@ -98,9 +118,10 @@ async function getProductsApi(params = {}) {
   };
 }
 
-async function getPopularProductsApi(params = {}) {
+// 수동 호출 유지: 생성 client의 pageable query 객체가 [object Object]로 직렬화될 수 있습니다.
+async function getPopularProductsApi(params: ProductQueryParams = {}) {
   const { sort: _sort, ...safeParams } = params;
-  const response = await apiClient("/api/products/popular", {
+  const response = await apiClient<LooseRecord>("/api/products/popular", {
     params: safeParams,
   });
 
@@ -120,12 +141,13 @@ async function getPopularProductsApi(params = {}) {
 }
 
 async function getProductDetailApi(productId) {
-  const response = await apiClient(`/api/products/${productId}`);
+  const response = await findProduct(productId);
   return toUiProduct(response.data);
 }
 
-async function getSellerProductsApi(params = {}) {
-  const response = await apiClient("/api/products/seller", {
+// 수동 호출 유지: 생성 params에 authenticatedMember/pageable 객체가 포함되어 query 직렬화가 안전하지 않습니다.
+async function getSellerProductsApi(params: LooseRecord = {}) {
+  const response = await apiClient<LooseRecord>("/api/products/seller", {
     params,
   });
 
@@ -144,11 +166,11 @@ async function getSellerProductsApi(params = {}) {
   };
 }
 
-async function getCategoriesApi(options = {}) {
+async function getCategoriesApi(options: CategoryQueryOptions = {}) {
   const { depth } = options;
-  const response = await apiClient("/api/categories", {
-    params: depth === undefined ? undefined : { depth },
-  });
+  const response = await getGeneratedCategories(
+    depth === undefined ? undefined : { depth },
+  );
   const categories = Array.isArray(response.data) ? response.data : [];
 
   return categories
@@ -167,7 +189,7 @@ async function getCategoriesApi(options = {}) {
 }
 
 async function getChildCategoriesApi(categoryId) {
-  const response = await apiClient(`/api/categories/${categoryId}/children`);
+  const response = await getGeneratedChildCategories(categoryId);
   const categories = Array.isArray(response.data) ? response.data : [];
 
   return categories
@@ -181,6 +203,7 @@ async function getChildCategoriesApi(categoryId) {
     });
 }
 
+// 수동 호출 유지: 생성 updateProduct는 현재 API client가 보내지 않는 authenticatedMember query 객체를 요구합니다.
 async function updateProductApi(productId, { title, description, price, stockQuantity, categoryId }) {
   const response = await apiClient(`/api/products/${productId}`, {
     method: "PUT",
@@ -225,14 +248,18 @@ async function createProductApi({
     formData.append("thumbnailIndex", String(thumbnailIndex));
   }
 
-  const response = await apiClient("/api/products", {
-    method: "POST",
-    body: formData,
-  });
+  const response = await createGeneratedProduct(
+    {
+      productData: String(formData.get("productData") ?? ""),
+      images: imageFiles,
+    },
+    images.length > 0 ? { thumbnailIndex } : undefined,
+  );
 
   return toUiProduct(response.data);
 }
 
+// 수동 호출 유지: 생성 uploadImage는 JSON으로 전송되지만 이 endpoint는 multipart FormData가 필요합니다.
 async function uploadProductImageApi(productId, file, { sortOrder = 0, isThumbnail = false } = {}) {
   ensureValidImageSize(file);
 
@@ -249,49 +276,52 @@ async function uploadProductImageApi(productId, file, { sortOrder = 0, isThumbna
 }
 
 async function deleteProductImageApi(productId, imageId) {
-  await apiClient(`/api/products/${productId}/images/${imageId}`, {
-    method: "DELETE",
-  });
+  await deleteGeneratedImage(productId, imageId);
 }
 
 async function createCategoryAdminApi({ name, description, sortOrder, parentId }) {
-  const response = await apiClient("/api/categories/admin", {
-    method: "POST",
-    body: { name, description: description || null, sortOrder: Number(sortOrder) || 0, parentId: parentId || null },
+  const response = await createGeneratedCategoryByAdmin({
+    name,
+    ...(description ? { description } : {}),
+    sortOrder: Number(sortOrder) || 0,
+    ...(parentId ? { parentId } : {}),
   });
   return toUiCategory(response.data);
 }
 
 async function createCategorySellerApi({ name, description, sortOrder, parentId }) {
-  const response = await apiClient("/api/categories", {
-    method: "POST",
-    body: { name, description: description || null, sortOrder: Number(sortOrder) || 0, parentId },
+  const response = await createGeneratedCategoryBySeller({
+    name,
+    ...(description ? { description } : {}),
+    sortOrder: Number(sortOrder) || 0,
+    ...(parentId ? { parentId } : {}),
   });
   return toUiCategory(response.data);
 }
 
 async function updateCategoryAdminApi(categoryId, { name, description, sortOrder }) {
-  const response = await apiClient(`/api/categories/admin/${categoryId}`, {
-    method: "PUT",
-    body: { name, description: description || null, sortOrder: Number(sortOrder) || 0 },
+  const response = await updateGeneratedCategoryByAdmin(categoryId, {
+    name,
+    ...(description ? { description } : {}),
+    sortOrder: Number(sortOrder) || 0,
   });
   return toUiCategory(response.data);
 }
 
 async function updateCategorySellerApi(categoryId, { name, description, sortOrder }) {
-  const response = await apiClient(`/api/categories/${categoryId}`, {
-    method: "PUT",
-    body: { name, description: description || null, sortOrder: Number(sortOrder) || 0 },
+  const response = await updateGeneratedCategoryBySeller(categoryId, {
+    name,
+    ...(description ? { description } : {}),
+    sortOrder: Number(sortOrder) || 0,
   });
   return toUiCategory(response.data);
 }
 
 async function deleteCategoryApi(categoryId) {
-  await apiClient(`/api/categories/${categoryId}`, {
-    method: "DELETE",
-  });
+  await deleteGeneratedCategory(categoryId);
 }
 
+// 수동 호출 유지: 생성 client의 배열 query 직렬화가 기존 repeated productIds 계약과 다를 수 있습니다.
 async function getProductsByIdsApi(productIds) {
   if (!productIds || productIds.length === 0) return [];
   const query = productIds.map((id) => `productIds=${encodeURIComponent(id)}`).join("&");
@@ -301,9 +331,7 @@ async function getProductsByIdsApi(productIds) {
 }
 
 async function reindexProductsEsApi() {
-  const response = await apiClient("/api/admin/products/reindex", {
-    method: "POST",
-  });
+  const response = await reindexGeneratedAll();
   return response.data;
 }
 
@@ -326,4 +354,6 @@ export {
   deleteCategoryApi,
   reindexProductsEsApi,
 };
+
+
 
