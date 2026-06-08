@@ -2,6 +2,7 @@
 import { getCategoriesApi, getProductDetailApi, getProductsApi } from "./productApi";
 
 function useProducts(params = {}) {
+  const paramsKey = JSON.stringify(params);
   const [products, setProducts] = useState([]);
   const [pageInfo, setPageInfo] = useState({
     page: 0,
@@ -23,7 +24,7 @@ function useProducts(params = {}) {
         setFetching(true);
         setError(null);
 
-        const data = await getProductsApi(params);
+        const data = await getProductsApi(JSON.parse(paramsKey));
 
         if (cancelled) {
           return;
@@ -51,7 +52,7 @@ function useProducts(params = {}) {
     return () => {
       cancelled = true;
     };
-  }, [params.page, params.size, params.sort]);
+  }, [paramsKey]);
 
   return {
     products,
@@ -143,3 +144,4 @@ function useCategories() {
 }
 
 export { useProduct, useProducts, useCategories };
+
