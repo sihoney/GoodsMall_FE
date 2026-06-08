@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { ApiError } from '../../api/client';
@@ -127,24 +127,7 @@ export default function AdminMemberRestrictionListPage() {
     durationHours: 24,
   });
 
-  useEffect(() => {
-    if (!initialMemberId) {
-      return;
-    }
-
-    void loadRestrictions(initialMemberId);
-  }, []);
-
-  useEffect(() => {
-    if (!bannerMessage) {
-      return undefined;
-    }
-
-    const timer = window.setTimeout(() => setBannerMessage(''), 3200);
-    return () => window.clearTimeout(timer);
-  }, [bannerMessage]);
-
-  async function loadRestrictions(targetMemberId) {
+  const loadRestrictions = useCallback(async (targetMemberId) => {
     if (!targetMemberId) {
       setRestrictions([]);
       setErrorMessage('조회할 회원 ID를 입력해주세요.');
@@ -174,7 +157,24 @@ export default function AdminMemberRestrictionListPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [setSearchParams]);
+
+  useEffect(() => {
+    if (!initialMemberId) {
+      return;
+    }
+
+    void loadRestrictions(initialMemberId);
+  }, [initialMemberId, loadRestrictions]);
+
+  useEffect(() => {
+    if (!bannerMessage) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => setBannerMessage(''), 3200);
+    return () => window.clearTimeout(timer);
+  }, [bannerMessage]);
 
   async function handleDeactivate(restrictionId) {
     try {

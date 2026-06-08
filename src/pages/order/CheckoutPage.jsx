@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import ConfirmModal from "../../components/common/ConfirmModal";
@@ -14,9 +14,11 @@ function formatPrice(value) {
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const checkoutItems = Array.isArray(location.state?.items)
-    ? location.state.items
-    : [];
+  const locationItems = location.state?.items;
+  const checkoutItems = useMemo(
+    () => (Array.isArray(locationItems) ? locationItems : []),
+    [locationItems]
+  );
   const hasCheckoutItems = checkoutItems.length > 0;
 
   const [form, setForm] = useState({
@@ -415,7 +417,7 @@ export default function CheckoutPage() {
                       </p>
                     </div>
                     <p className="text-lg font-extrabold text-blue-700">
-                      {formatPrice(item.price * item.quantity)}원
+                      {formatPrice(item.price * item.quantity)}??
                     </p>
                   </div>
                 </article>
@@ -480,7 +482,9 @@ export default function CheckoutPage() {
         open={openConfirmModal}
         onClose={() => setOpenConfirmModal(false)}
         title="결제 페이지로 이동할까요?"
-        description={`${paymentMethodLabel}로 총 ${formatPrice(summary.total)}원을 결제합니다.`}
+        description={
+          paymentMethodLabel + "로 총 " + formatPrice(summary.total) + "원을 결제합니다."
+        }
         confirmText="다음으로"
         loading={isSubmitting}
         onConfirm={handleSubmitOrder}
@@ -488,3 +492,4 @@ export default function CheckoutPage() {
     </>
   );
 }
+
