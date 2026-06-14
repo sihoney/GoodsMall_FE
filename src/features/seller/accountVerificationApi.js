@@ -1,45 +1,32 @@
-import { apiClient } from "../../api/client";
+import {
+  cancelAccountVerification as cancelGeneratedAccountVerification,
+  confirmAccountVerification as confirmGeneratedAccountVerification,
+  getCurrentAccountVerification as getGeneratedCurrentAccountVerification,
+  resendAccountVerification as resendGeneratedAccountVerification,
+} from "../../api/generated/member/member";
 
 const unwrapResponse = (response) => response?.data?.data ?? null;
 
 async function getCurrentAccountVerificationApi() {
-  const response = await apiClient("/api/members/me/account-verifications/current", {
-    method: "GET",
-  });
+  const response = await getGeneratedCurrentAccountVerification();
 
   return unwrapResponse(response);
 }
 
 async function confirmAccountVerificationApi({ sessionId, code }) {
-  const response = await apiClient(
-    `/api/members/me/account-verifications/${sessionId}/confirm`,
-    {
-      method: "POST",
-      body: { code },
-    }
-  );
+  const response = await confirmGeneratedAccountVerification(sessionId, { code });
 
   return unwrapResponse(response);
 }
 
 async function resendAccountVerificationApi(sessionId) {
-  const response = await apiClient(
-    `/api/members/me/account-verifications/${sessionId}/resend`,
-    {
-      method: "POST",
-    }
-  );
+  const response = await resendGeneratedAccountVerification(sessionId);
 
   return unwrapResponse(response);
 }
 
 async function cancelAccountVerificationApi(sessionId) {
-  const response = await apiClient(
-    `/api/members/me/account-verifications/${sessionId}/cancel`,
-    {
-      method: "POST",
-    }
-  );
+  const response = await cancelGeneratedAccountVerification(sessionId);
 
   return unwrapResponse(response);
 }
