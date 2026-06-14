@@ -5,7 +5,7 @@ import {
   createProduct as createGeneratedProduct,
   deleteCategory as deleteGeneratedCategory,
   deleteImage as deleteGeneratedImage,
-  findProduct,
+  findProduct as findGeneratedProduct,
   getCategories as getGeneratedCategories,
   getChildCategories as getGeneratedChildCategories,
   reindexAll as reindexGeneratedAll,
@@ -141,7 +141,7 @@ async function getPopularProductsApi(params: ProductQueryParams = {}) {
 }
 
 async function getProductDetailApi(productId) {
-  const response = await findProduct(productId);
+  const response = await findGeneratedProduct(productId);
   return toUiProduct(response.data);
 }
 
