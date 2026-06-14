@@ -1,69 +1,68 @@
-﻿import { apiClient } from '../../api/client';
+import {
+  approveReport as approveGeneratedReport,
+  createReport as createGeneratedReport,
+  createRestriction as createGeneratedRestriction,
+  deactivateRestriction as deactivateGeneratedRestriction,
+  getAllReports as getGeneratedAllReports,
+  getMemberRestrictions as getGeneratedMemberRestrictions,
+  getMyReports as getGeneratedMyReports,
+  getReportDetail as getGeneratedReportDetail,
+  rejectReport as rejectGeneratedReport,
+} from '../../api/generated/member/member';
+
+const unwrapResponse = (response, fallback = undefined) =>
+  response?.data?.data ?? response?.data ?? fallback;
 
 export async function createMemberReport(payload) {
-  const response = await apiClient('/api/member-reports', {
-    method: 'POST',
-    body: payload,
-  });
+  const response = await createGeneratedReport(payload, {});
 
-  return response.data?.data ?? response.data;
+  return unwrapResponse(response);
 }
 
 export async function getMyMemberReports() {
-  const response = await apiClient('/api/member-reports/me');
+  const response = await getGeneratedMyReports({});
 
-  return response.data?.data ?? response.data ?? [];
+  return unwrapResponse(response, []);
 }
 
 export async function getAdminMemberReports() {
-  const response = await apiClient('/api/admin/member-reports');
+  const response = await getGeneratedAllReports({});
 
-  return response.data?.data ?? response.data ?? [];
+  return unwrapResponse(response, []);
 }
 
 export async function getAdminMemberReportDetail(reportId) {
-  const response = await apiClient(`/api/admin/member-reports/${reportId}`);
+  const response = await getGeneratedReportDetail(reportId, {});
 
-  return response.data?.data ?? response.data;
+  return unwrapResponse(response);
 }
 
 export async function approveAdminMemberReport(reportId, payload) {
-  const response = await apiClient(`/api/admin/member-reports/${reportId}/approve`, {
-    method: 'PATCH',
-    body: payload,
-  });
+  const response = await approveGeneratedReport(reportId, payload, {});
 
-  return response.data?.data ?? response.data;
+  return unwrapResponse(response);
 }
 
 export async function rejectAdminMemberReport(reportId, payload) {
-  const response = await apiClient(`/api/admin/member-reports/${reportId}/reject`, {
-    method: 'PATCH',
-    body: payload,
-  });
+  const response = await rejectGeneratedReport(reportId, payload, {});
 
-  return response.data?.data ?? response.data;
+  return unwrapResponse(response);
 }
 
 export async function getAdminMemberRestrictions(memberId) {
-  const response = await apiClient(`/api/admin/member-restrictions/members/${memberId}`);
+  const response = await getGeneratedMemberRestrictions(memberId, {});
 
-  return response.data?.data ?? response.data ?? [];
+  return unwrapResponse(response, []);
 }
 
 export async function createAdminMemberRestriction(payload) {
-  const response = await apiClient('/api/admin/member-restrictions', {
-    method: 'POST',
-    body: payload,
-  });
+  const response = await createGeneratedRestriction(payload, {});
 
-  return response.data?.data ?? response.data;
+  return unwrapResponse(response);
 }
 
 export async function deactivateAdminMemberRestriction(restrictionId) {
-  const response = await apiClient(`/api/admin/member-restrictions/${restrictionId}/deactivate`, {
-    method: 'PATCH',
-  });
+  const response = await deactivateGeneratedRestriction(restrictionId, {});
 
-  return response.data?.data ?? response.data;
+  return unwrapResponse(response);
 }
