@@ -53,10 +53,7 @@ function getStatusMeta(status) {
       return { label: "일부 배송 중", className: "bg-sky-100 text-sky-700" };
     case "DELIVERED":
       return { label: "배송 완료", className: "bg-indigo-100 text-indigo-700" };
-      return {
-        label: "주문 완료",
-        className: "bg-blue-100 text-blue-700",
-      };
+
     case "COMPLETED":
       return { label: "구매 확정", className: "bg-emerald-100 text-emerald-700" };
     case "PARTIAL_CANCELED":

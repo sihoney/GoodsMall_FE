@@ -141,10 +141,6 @@ export default function SellerRefundManagementPage() {
   const [toastType, setToastType] = useState("success");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-  // 권한 확인
-  if (!authLoading && (!user || user.role !== "SELLER")) {
-    return <Navigate to="/" />;
-  }
 
   // 환불 목록 조회
   const fetchRefundList = useCallback(async () => {
@@ -226,7 +222,10 @@ export default function SellerRefundManagementPage() {
     setIsConfirmModalOpen(false);
     setSelectedRefund(null);
   };
-
+  // Guard after hooks so hook call order is stable across renders.
+  if (!authLoading && (!user || user.role !== "SELLER")) {
+    return <Navigate to="/" />;
+  }
   // Empty state
   if (!loading && refunds.length === 0) {
     return (

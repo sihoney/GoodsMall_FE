@@ -13,7 +13,7 @@ const MOCK_FAILED_PAYMENT = {
     "현재 보유한 예치금이 결제 금액보다 부족합니다. 예치금을 충전한 뒤 다시 결제를 시도해 주세요.",
 };
 
-function formatPrice(value) {
+function _formatPrice(value) {
   return `${new Intl.NumberFormat("ko-KR").format(value)}원`;
 }
 

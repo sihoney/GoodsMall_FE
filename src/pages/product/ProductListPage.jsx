@@ -168,6 +168,7 @@ export default function ProductListPage() {
   const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset pagination when the active filters change.
     setCurrentPage(0);
   }, [keyword, statusFilter, sort, selectedCategoryId]);
 

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import PageContainer from "../../components/common/PageContainer";
@@ -38,8 +38,7 @@ function buildFailureModel(search, state) {
       source.amount ??
       source.approvedAmount ??
       pendingCharge?.amount ??
-      Number(searchParams.get("amount") || 0) ??
-      MOCK_DEPOSIT_FAILURE.amount,
+      Number(searchParams.get("amount") || 0),
     errorCode: source.errorCode || searchParams.get("code") || MOCK_DEPOSIT_FAILURE.errorCode,
     orderId: source.orderId || orderIdFromQuery || source.pgOrderId || MOCK_DEPOSIT_FAILURE.orderId,
   };
