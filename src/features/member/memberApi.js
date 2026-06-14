@@ -1,13 +1,21 @@
-﻿import { ApiError, apiClient } from '../../api/client';
+import { ApiError } from '../../api/client';
+import {
+  changeCurrentMemberPassword as changeGeneratedCurrentMemberPassword,
+  createPresignedUploadUrl as createGeneratedPresignedUploadUrl,
+  getCurrentMemberOauthAccounts as getGeneratedCurrentMemberOauthAccounts,
+  getMember as getGeneratedMember,
+  unlinkCurrentMemberOauthAccount as unlinkGeneratedCurrentMemberOauthAccount,
+  updateCurrentMember as updateGeneratedCurrentMember,
+} from '../../api/generated/member/member';
 
-const unwrapResponse = (response) => response?.data?.data ?? null;
+const unwrapResponse = (response) => response?.data?.data ?? response?.data ?? null;
 
 export async function getMemberByIdApi(memberId) {
   if (!memberId) {
     return null;
   }
 
-  const response = await apiClient(`/api/members/${memberId}`);
+  const response = await getGeneratedMember(memberId);
   return unwrapResponse(response);
 }
 
@@ -17,14 +25,11 @@ export async function updateCurrentMemberApi({
   address = null,
   profileImageKey = null,
 }) {
-  const response = await apiClient('/api/members/me', {
-    method: 'PATCH',
-    body: {
-      nickname,
-      phone,
-      address,
-      profileImageKey,
-    },
+  const response = await updateGeneratedCurrentMember({
+    nickname,
+    phone,
+    address,
+    profileImageKey,
   });
 
   return unwrapResponse(response);
@@ -34,19 +39,16 @@ export async function changeCurrentMemberPasswordApi({
   currentPassword,
   newPassword,
 }) {
-  const response = await apiClient('/api/members/me/password', {
-    method: 'PATCH',
-    body: {
-      currentPassword,
-      newPassword,
-    },
+  const response = await changeGeneratedCurrentMemberPassword({
+    currentPassword,
+    newPassword,
   });
 
   return unwrapResponse(response);
 }
 
 export async function getMyOauthAccountsApi() {
-  const response = await apiClient('/api/members/me/oauth-accounts');
+  const response = await getGeneratedCurrentMemberOauthAccounts();
   return unwrapResponse(response);
 }
 
@@ -59,18 +61,13 @@ export async function unlinkMyOauthAccountApi(provider) {
     });
   }
 
-  const response = await apiClient(`/api/members/me/oauth-accounts/${provider}`, {
-    method: 'DELETE',
-  });
+  const response = await unlinkGeneratedCurrentMemberOauthAccount(provider);
 
   return unwrapResponse(response);
 }
 
 export async function presignProfileImageUploadApi({ fileName, contentType }) {
-  const response = await apiClient('/api/auth/profile-images/presign', {
-    method: 'POST',
-    body: { fileName, contentType },
-  });
+  const response = await createGeneratedPresignedUploadUrl({ fileName, contentType });
 
   return unwrapResponse(response);
 }
