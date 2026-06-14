@@ -89,7 +89,6 @@ export default function OAuthCallbackPage({ provider = "KAKAO" }) {
           setMessage("로그인 중이에요...");
           setAuthTokens({
             accessToken: result.accessToken,
-            refreshToken: result.refreshToken,
           });
           const user = await getMyInfoApi();
 

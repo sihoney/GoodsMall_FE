@@ -316,7 +316,7 @@ export default function SellerAccountVerificationPage() {
       });
 
       const promotedAuth = result?.auth;
-      if (!promotedAuth?.accessToken || !promotedAuth?.refreshToken) {
+      if (!promotedAuth?.accessToken) {
         throw new Error(
           "판매자 권한 토큰이 응답에 포함되지 않았습니다. confirm 응답을 확인해 주세요."
         );
@@ -324,7 +324,6 @@ export default function SellerAccountVerificationPage() {
 
       setAuthTokens({
         accessToken: promotedAuth.accessToken,
-        refreshToken: promotedAuth.refreshToken,
       });
 
       setVerification((prev) =>
