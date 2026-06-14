@@ -10,6 +10,7 @@ import { getAuctionsApi } from "../../features/auction/auctionApi";
 import {
   getCategoriesApi,
   getPopularProductsApi,
+  getProductsByIdsApi,
   getProductsApi,
 } from "../../features/product/productApi";
 
@@ -40,6 +41,7 @@ export default function HomePage() {
   const [popularProducts, setPopularProducts] = useState([]);
   const [latestProducts, setLatestProducts] = useState([]);
   const [ongoingAuctions, setOngoingAuctions] = useState([]);
+  const [auctionImageMap, setAuctionImageMap] = useState({});
 
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [loadingPopularProducts, setLoadingPopularProducts] = useState(true);
@@ -117,6 +119,26 @@ export default function HomePage() {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    if (!ongoingAuctions.length) return undefined;
+
+    let cancelled = false;
+    const productIds = [...new Set(ongoingAuctions.map((auction) => auction.productId).filter(Boolean))];
+
+    if (!productIds.length) return undefined;
+
+    getProductsByIdsApi(productIds)
+      .then((products) => {
+        if (cancelled) return;
+
+        const map = Object.fromEntries(products.map((product) => [product.id, product.image]));
+        setAuctionImageMap((prev) => ({ ...prev, ...map }));
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [ongoingAuctions]);
+
   async function handleAddToCart(product) {
     try {
       await addToCart({ productId: product.id, quantity: 1 });
@@ -192,7 +214,10 @@ export default function HomePage() {
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {ongoingAuctions.map((auction) => (
                 <div key={auction.id} className="w-44 flex-none sm:w-52">
-                  <AuctionCard auction={auction} />
+                  <AuctionCard
+                    auction={auction}
+                    productImage={auctionImageMap[auction.productId] ?? null}
+                  />
                 </div>
               ))}
             </div>

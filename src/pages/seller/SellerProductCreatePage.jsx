@@ -620,6 +620,8 @@ export default function SellerProductCreatePage() {
       setSubmitError("");
 
       const isAuction = form.type === "AUCTION";
+      // TODO: Move auction product creation to a backend orchestration API or Saga.
+      // The current split product -> auction calls can leave orphan AUCTION products if auction creation fails.
       const product = await createProductApi({
         title: form.title.trim(),
         description: form.description.trim(),
@@ -632,9 +634,18 @@ export default function SellerProductCreatePage() {
       });
 
       if (form.type === "AUCTION") {
+        const thumbnail =
+          product.images?.find((image) => image.isThumbnail) ??
+          product.images?.[0];
+
+        if (!thumbnail?.s3Key) {
+          throw new Error("경매 상품의 대표 이미지 정보가 없습니다.");
+        }
+
         await createAuctionApi({
           productId: product.id,
           productTitle: product.name,
+          thumbnailKey: thumbnail.s3Key,
           startPrice: Number(auctionForm.startPrice),
           bidUnit: Number(auctionForm.bidUnit),
           startedAt: auctionForm.startedAt.length === 16 ? auctionForm.startedAt + ":00" : auctionForm.startedAt,
