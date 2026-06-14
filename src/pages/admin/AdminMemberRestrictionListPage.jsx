@@ -11,18 +11,25 @@ import AdminNav from '../../components/admin/AdminNav';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 
 const restrictionTypeLabels = {
-  LOGIN_BAN: 'Login Lock',
-  CHAT_BAN: 'Chat Mute',
-  TRADE_BAN: 'Trade Ban',
+  LOGIN_BAN: '로그인 제한',
+  CHAT_BAN: '채팅 제한',
+  TRADE_BAN: '거래 제한',
 };
 
 const durationOptions = [
-  { value: 24, label: '1 Day' },
-  { value: 72, label: '3 Days' },
-  { value: 168, label: '7 Days' },
-  { value: 720, label: '30 Days' },
-  { value: 87600, label: 'Permanent' },
+  { value: 24, label: '1일' },
+  { value: 72, label: '3일' },
+  { value: 168, label: '7일' },
+  { value: 720, label: '30일' },
+  { value: 87600, label: '영구' },
 ];
+
+const restrictionStatusLabels = {
+  ACTIVE: '활성',
+  EXPIRED: '만료',
+  DEACTIVATED: '해제됨',
+  UNKNOWN: '알 수 없음',
+};
 
 function formatDateTime(value) {
   if (!value) {
@@ -298,7 +305,7 @@ export default function AdminMemberRestrictionListPage() {
                   value={keyword}
                   onChange={(event) => setKeyword(event.target.value)}
                   className="w-full rounded border-none bg-blue-50 py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                  placeholder="Search by ID or reason..."
+                  placeholder="회원 ID 또는 사유로 검색"
                   type="text"
                 />
               </div>
@@ -307,17 +314,17 @@ export default function AdminMemberRestrictionListPage() {
                 onChange={(event) => setStatusFilter(event.target.value)}
                 className="min-w-[140px] rounded border-none bg-blue-50 px-4 py-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-400"
               >
-                <option value="ALL">All Status</option>
-                <option value="ACTIVE">Active</option>
-                <option value="EXPIRED">Expired</option>
-                <option value="DEACTIVATED">Deactivated</option>
+                <option value="ALL">전체 상태</option>
+                <option value="ACTIVE">활성</option>
+                <option value="EXPIRED">만료</option>
+                <option value="DEACTIVATED">해제됨</option>
               </select>
               <button
                 type="button"
                 onClick={() => loadRestrictions((form.memberId || memberId || keyword).trim())}
                 className="flex items-center gap-2 rounded bg-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-blue-700"
               >
-                Filter
+                조회
               </button>
             </div>
 
@@ -326,13 +333,13 @@ export default function AdminMemberRestrictionListPage() {
                 <table className="w-full border-collapse text-left">
                   <thead>
                     <tr className="bg-blue-50 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                      <th className="px-6 py-4">Target Member</th>
-                      <th className="px-6 py-4">Type</th>
-                      <th className="px-6 py-4">Reason</th>
-                      <th className="px-6 py-4">Duration</th>
-                      <th className="px-6 py-4">End Date</th>
-                      <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
+                      <th className="px-6 py-4">대상 회원</th>
+                      <th className="px-6 py-4">유형</th>
+                      <th className="px-6 py-4">사유</th>
+                      <th className="px-6 py-4">기간</th>
+                      <th className="px-6 py-4">종료일</th>
+                      <th className="px-6 py-4">상태</th>
+                      <th className="px-6 py-4 text-right">작업</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-blue-100">
@@ -374,7 +381,7 @@ export default function AdminMemberRestrictionListPage() {
                               <div className="truncate">{restriction.reason}</div>
                             </td>
                             <td className="px-6 py-5 text-sm text-on-surface">
-                              {restriction.durationHours >= 87600 ? 'Permanent' : `${restriction.durationHours} Hours`}
+                              {restriction.durationHours >= 87600 ? '영구' : `${restriction.durationHours}시간`}
                             </td>
                             <td className="px-6 py-5">
                               <div className="text-sm font-medium">{formatDateOnly(restriction.endAt)}</div>
@@ -383,7 +390,7 @@ export default function AdminMemberRestrictionListPage() {
                             <td className="px-6 py-5">
                               <span className={['flex items-center gap-1.5 text-[11px] font-bold', getStatusBadge(status)].join(' ')}>
                                 <span className={['h-1.5 w-1.5 rounded-full', getStatusDot(status), isActive ? 'animate-pulse' : ''].join(' ')} />
-                                {status}
+                                {restrictionStatusLabels[status] || status}
                               </span>
                             </td>
                             <td className="px-6 py-5 text-right">
@@ -393,7 +400,7 @@ export default function AdminMemberRestrictionListPage() {
                                 onClick={() => handleDeactivate(restriction.restrictionId)}
                                 className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-600 transition-colors hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400"
                               >
-                                {isArchived ? 'Archived' : deactivatingId === restriction.restrictionId ? 'Deactivating...' : 'Deactivate'}
+                                {isArchived ? '보관됨' : deactivatingId === restriction.restrictionId ? '해제 중...' : '해제'}
                               </button>
                             </td>
                           </tr>
@@ -404,7 +411,7 @@ export default function AdminMemberRestrictionListPage() {
                 </table>
               </div>
               <div className="flex items-center justify-between border-t border-gray-200 bg-blue-50 px-6 py-4">
-                <span className="text-xs text-slate-500">Showing {filteredRestrictions.length} of {restrictions.length} sanctions</span>
+                <span className="text-xs text-slate-500">전체 {restrictions.length}건 중 {filteredRestrictions.length}건 표시</span>
                 <div className="flex items-center gap-2">
                   <button type="button" className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-white">‹</button>
                   <button type="button" className="h-8 w-8 rounded-lg bg-blue-600 text-xs font-bold text-white">1</button>
@@ -421,25 +428,25 @@ export default function AdminMemberRestrictionListPage() {
               <div className="mb-8 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center bg-blue-100 text-blue-600">+</div>
                 <div>
-                  <h2 className="text-xl font-extrabold text-on-surface">Register Sanction</h2>
-                  <p className="text-xs text-slate-500">Impose restrictions on a member</p>
+                  <h2 className="text-xl font-extrabold text-on-surface">제재 등록</h2>
+                  <p className="text-xs text-slate-500">회원에게 적용할 제재를 등록합니다.</p>
                 </div>
               </div>
 
               <form className="space-y-6" onSubmit={handleCreateRestriction}>
                 <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Target Member ID</label>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-slate-500">대상 회원 ID</label>
                   <input
                     value={form.memberId}
                     onChange={(event) => setForm((current) => ({ ...current, memberId: event.target.value }))}
                     className="w-full rounded border-none bg-blue-100 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                    placeholder="Enter Member ID"
+                    placeholder="회원 ID 입력"
                     type="text"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Sanction Type</label>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-slate-500">제재 유형</label>
                   <div className="grid grid-cols-2 gap-3">
                     {Object.entries(restrictionTypeLabels).map(([value, label]) => (
                       <label key={value} className="cursor-pointer">
@@ -459,18 +466,18 @@ export default function AdminMemberRestrictionListPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Reason for Sanction</label>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-slate-500">제재 사유</label>
                   <textarea
                     value={form.reason}
                     onChange={(event) => setForm((current) => ({ ...current, reason: event.target.value }))}
                     className="w-full rounded border-none bg-blue-100 p-4 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                    placeholder="Describe the violation details..."
+                    placeholder="위반 내용을 입력하세요."
                     rows="4"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Duration Setting</label>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-slate-500">제재 기간</label>
                   <select
                     value={String(form.durationHours)}
                     onChange={(event) => setForm((current) => ({ ...current, durationHours: Number(event.target.value) }))}
@@ -488,18 +495,18 @@ export default function AdminMemberRestrictionListPage() {
                     disabled={submitting}
                     type="submit"
                   >
-                    {submitting ? 'PROCESSING...' : 'CONFIRM SANCTION'}
+                    {submitting ? '처리 중...' : '제재 등록'}
                   </button>
                   <p className="mt-4 px-4 text-center text-[10px] text-slate-500">
-                    By confirming, you acknowledge this action is logged and visible to senior management.
+                    제재 등록 시 처리 이력이 기록되며 관리자 화면에서 확인할 수 있습니다.
                   </p>
                 </div>
               </form>
 
               <div className="mt-8 bg-blue-50 p-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Active Restrictions</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">활성 제재</p>
                 <p className="mt-2 text-3xl font-black text-blue-700">{activeCount}</p>
-                <p className="mt-1 text-xs text-slate-500">Current target: {memberId || form.memberId || '미선택'}</p>
+                <p className="mt-1 text-xs text-slate-500">현재 대상: {memberId || form.memberId || '미선택'}</p>
               </div>
             </div>
           </div>

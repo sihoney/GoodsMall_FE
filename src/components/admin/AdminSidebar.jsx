@@ -4,19 +4,19 @@ function AdminSidebar({ currentPage = 'dashboard' }) {
   const isActive = (page) => currentPage === page;
 
   const sidebarItems = [
-    { id: 'dashboard', label: 'Overview', icon: '📊', to: '#' },
-    { id: 'reports', label: 'All Reports', icon: '⚑', to: '/admin/member-reports' },
-    { id: 'sanctions', label: 'Sanction History', icon: '🚫', to: '/admin/member-restrictions' },
-    { id: 'categories', label: 'Categories', icon: '🗂', to: '/admin/categories' },
-    { id: 'settlement-ops', label: 'Settlement Ops', icon: '💸', to: '/admin/settlements/ops' },
-    { id: 'embeddings', label: 'Embeddings', icon: '🤖', to: '/admin/embeddings' },
+    { id: 'dashboard', label: '운영 현황', icon: '📊', to: '#' },
+    { id: 'reports', label: '전체 신고', icon: '⚑', to: '/admin/member-reports' },
+    { id: 'sanctions', label: '제재 이력', icon: '🚫', to: '/admin/member-restrictions' },
+    { id: 'categories', label: '카테고리 관리', icon: '🗂', to: '/admin/categories' },
+    { id: 'settlement-ops', label: '정산 운영', icon: '💸', to: '/admin/settlements/ops' },
+    { id: 'embeddings', label: 'AI 임베딩 관리', icon: '🤖', to: '/admin/embeddings' },
   ];
 
   return (
     <aside className="fixed left-0 top-0 hidden h-screen w-64 border-r border-violet-100 bg-[#f3e2ff] p-4 pt-20 lg:flex lg:flex-col">
       <div className="mb-6 px-4 py-6">
-        <h2 className="text-lg font-bold text-violet-700">Admin Panel</h2>
-        <p className="text-xs text-slate-500">Artifact Control</p>
+        <h2 className="text-lg font-bold text-violet-700">관리자 패널</h2>
+        <p className="text-xs text-slate-500">GoodsMall 운영 관리</p>
       </div>
 
       <nav className="flex-1 space-y-1">
@@ -41,7 +41,7 @@ function AdminSidebar({ currentPage = 'dashboard' }) {
         to="/member-reports/new"
         className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-violet-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/20 transition hover:scale-[1.02]"
       >
-        + Quick Report
+        + 신고 작성
       </Link>
     </aside>
   );

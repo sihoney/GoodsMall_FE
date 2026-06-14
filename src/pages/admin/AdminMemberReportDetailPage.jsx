@@ -236,13 +236,13 @@ export default function AdminMemberReportDetailPage() {
   return (
     <div className="min-h-screen bg-blue-50 text-gray-900">
       <nav className="fixed top-0 z-50 flex w-full items-center justify-between border-b border-gray-200 bg-blue-50/80 px-6 py-3 backdrop-blur-xl shadow-sm">
-        <div className="text-xl font-black tracking-tight text-blue-700">Vivid Artifact</div>
+        <div className="text-xl font-black tracking-tight text-blue-700">GoodsMall</div>
         <div className="hidden items-center gap-8 md:flex">
-          <a className="font-bold text-slate-500 hover:text-blue-500" href="#">Dashboard</a>
-          <Link className="relative font-bold text-blue-700 after:absolute after:-bottom-1 after:left-1/2 after:h-1 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-blue-600" to="/admin/member-reports">Reports</Link>
-          <Link className="font-bold text-slate-500 hover:text-blue-500" to="/admin/member-restrictions">Sanctions</Link>
-          <Link className="font-bold text-slate-500 hover:text-blue-500" to="/admin/categories">Categories</Link>
-          <a className="font-bold text-slate-500 hover:text-blue-500" href="#">Users</a>
+          <a className="font-bold text-slate-500 hover:text-blue-500" href="#">대시보드</a>
+          <Link className="relative font-bold text-blue-700 after:absolute after:-bottom-1 after:left-1/2 after:h-1 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-blue-600" to="/admin/member-reports">신고 관리</Link>
+          <Link className="font-bold text-slate-500 hover:text-blue-500" to="/admin/member-restrictions">제재 관리</Link>
+          <Link className="font-bold text-slate-500 hover:text-blue-500" to="/admin/categories">카테고리 관리</Link>
+          <a className="font-bold text-slate-500 hover:text-blue-500" href="#">회원 관리</a>
         </div>
         <div className="flex items-center gap-4">
           <div className="h-8 w-8 rounded-full bg-blue-200 ring-2 ring-blue-200/60" />
@@ -252,21 +252,21 @@ export default function AdminMemberReportDetailPage() {
       <div className="flex min-h-screen pt-20">
         <aside className="hidden h-screen w-64 shrink-0 border-r border-gray-200 bg-blue-50 p-4 pt-20 md:flex md:flex-col">
           <div className="px-4 py-6">
-            <p className="text-lg font-bold text-blue-700">Admin Panel</p>
-            <p className="text-xs text-slate-500">Artifact Control</p>
+            <p className="text-lg font-bold text-blue-700">관리자 패널</p>
+            <p className="text-xs text-slate-500">GoodsMall 운영 관리</p>
           </div>
           <nav className="flex-1 space-y-1">
-            <div className="rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-white/70">Overview</div>
+            <div className="rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-white/70">운영 현황</div>
             <Link to="/admin/member-reports" className="flex items-center gap-3 rounded-lg bg-blue-100 px-4 py-3 text-sm font-medium text-blue-700">
-              All Reports
+              전체 신고
             </Link>
-            <div className="rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-white/70">Pending Review</div>
-            <Link to="/admin/member-restrictions" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-white/70 block">Sanction History</Link>
-            <Link to="/admin/member-restrictions" className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition hover:translate-x-1 hover:bg-white/70">Sanction History</Link>
+            <div className="rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-white/70">검토 대기</div>
+            <Link to="/admin/member-restrictions" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-white/70 block">제재 이력</Link>
+            <Link to="/admin/member-restrictions" className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition hover:translate-x-1 hover:bg-white/70">제재 이력</Link>
             <Link to="/admin/categories" className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition hover:translate-x-1 hover:bg-white/70">
               <span>🗂</span> 카테고리 관리
             </Link>
-            <div className="rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-white/70">System Logs</div>
+            <div className="rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-white/70">시스템 로그</div>
           </nav>
         </aside>
 
@@ -275,11 +275,11 @@ export default function AdminMemberReportDetailPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  <Link to="/admin/member-reports" className="hover:text-blue-500">Reports</Link>
+                  <Link to="/admin/member-reports" className="hover:text-blue-500">신고 관리</Link>
                   <span>{'>'}</span>
                   <span className="text-blue-700">CASE {reportId}</span>
                 </div>
-                <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">정밀 신고 검토</h1>
+                <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">회원 신고 검토</h1>
               </div>
               <span className={['inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-bold', status.badge].join(' ')}>
                 <span className="text-base">●</span>

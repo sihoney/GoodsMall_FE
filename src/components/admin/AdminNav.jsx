@@ -4,20 +4,20 @@ function AdminNav({ currentPage = 'dashboard' }) {
   const isActive = (page) => currentPage === page;
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', href: '#' },
-    { id: 'reports', label: 'Reports', to: '/admin/member-reports' },
-    { id: 'sanctions', label: 'Sanctions', to: '/admin/member-restrictions' },
-    { id: 'categories', label: 'Categories', to: '/admin/categories' },
-    { id: 'settlement-ops', label: 'Settlement Ops', to: '/admin/settlements/ops' },
-    { id: 'embeddings', label: 'Embeddings', to: '/admin/embeddings' },
-    { id: 'users', label: 'Users', href: '#' },
+    { id: 'dashboard', label: '대시보드', href: '#' },
+    { id: 'reports', label: '신고 관리', to: '/admin/member-reports' },
+    { id: 'sanctions', label: '제재 관리', to: '/admin/member-restrictions' },
+    { id: 'categories', label: '카테고리 관리', to: '/admin/categories' },
+    { id: 'settlement-ops', label: '정산 운영', to: '/admin/settlements/ops' },
+    { id: 'embeddings', label: 'AI 임베딩 관리', to: '/admin/embeddings' },
+    { id: 'users', label: '회원 관리', href: '#' },
   ];
 
   return (
     <nav className="fixed top-0 z-50 flex w-full items-center justify-between border-b border-violet-100 bg-[#fdf3ff]/80 px-6 py-3 backdrop-blur-xl shadow-sm">
       <div className="flex items-center gap-8">
         <Link to="/" className="text-xl font-black tracking-tight text-violet-700 hover:opacity-80 transition-opacity">
-          Vivid Artifact
+          GoodsMall
         </Link>
         <div className="hidden items-center gap-6 md:flex">
           {navItems.map((item) => {
