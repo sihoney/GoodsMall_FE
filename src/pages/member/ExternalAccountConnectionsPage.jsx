@@ -4,7 +4,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import { ApiError } from "../../api/client";
 import Button from "../../components/common/Button";
 import PageContainer from "../../components/common/PageContainer";
-import { fetchKakaoLinkAuthorizeUrlApi } from "../../features/auth/authApi";
 import { useAuth } from "../../features/auth/useAuth";
 import {
   getMyOauthAccountsApi,
@@ -12,6 +11,9 @@ import {
 } from "../../features/member/memberApi";
 
 const KAKAO_PROVIDER = "KAKAO";
+const unavailableOAuthLinkAuthorizeUrlApi = async () => {
+  throw new Error("OAuth 계정 연결은 현재 지원하지 않습니다.");
+};
 
 function formatDate(value) {
   if (!value) {
@@ -249,7 +251,8 @@ export default function ExternalAccountConnectionsPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
   const [isUnlinking, setIsUnlinking] = useState(false);
-  const [isStartingLink, setIsStartingLink] = useState(false);
+  const isStartingLink = false;
+  const setIsStartingLink = () => {};
   const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
 
   useEffect(() => {
@@ -330,7 +333,7 @@ export default function ExternalAccountConnectionsPage() {
       setErrorMessage("");
       clearFeedbackQuery();
 
-      const response = await fetchKakaoLinkAuthorizeUrlApi();
+      const response = await unavailableOAuthLinkAuthorizeUrlApi();
       const authorizeUrl = response?.authorizeUrl;
 
       if (!authorizeUrl) {
@@ -415,7 +418,7 @@ export default function ExternalAccountConnectionsPage() {
         <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className="text-sm font-bold uppercase tracking-[0.24em] text-blue-600">
-              Account Security
+              계정 보안
             </p>
             <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
               외부 계정 연동 관리
@@ -449,13 +452,13 @@ export default function ExternalAccountConnectionsPage() {
 
       <section className="mt-8">
         <ProviderCard
-          name="Kakao Sync"
+          name="카카오 계정"
           description="카카오 계정을 연결하면 카카오 로그인으로 TodayLunch에 바로 들어올 수 있어요."
           connected={Boolean(kakaoConnection)}
           tone="kakao"
           actionLabel={kakaoConnection ? "연동 해제" : "카카오 계정 연결"}
           actionBusy={kakaoConnection ? isUnlinking : isStartingLink}
-          actionDisabled={false}
+          actionDisabled={!kakaoConnection}
           onAction={() => {
             if (kakaoConnection) {
               setShowUnlinkConfirm(true);

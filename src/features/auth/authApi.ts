@@ -23,29 +23,12 @@ async function fetchOAuthAuthorizeUrlApi(provider: string) {
   return unwrapResponse(response);
 }
 
-async function fetchOAuthLinkAuthorizeUrlApi(provider: string) {
-  const normalizedProvider = normalizeOAuthProvider(provider);
-  const response = await apiClient(
-    `/api/auth/oauth/${normalizedProvider}/link/authorize-url`,
-  );
-
-  return unwrapResponse(response);
-}
-
-async function fetchOAuthResultApi({ provider, resultKey }: { provider: string; resultKey: string }) {
-  const normalizedProvider = normalizeOAuthProvider(provider);
-  const response = await apiClient(`/api/auth/oauth/${normalizedProvider}/result`, {
-    params: { resultKey },
-  });
-
-  return unwrapResponse(response);
-}
-
-async function linkOAuthAccountApi({ provider, linkToken }: { provider: string; linkToken: string }) {
-  const normalizedProvider = normalizeOAuthProvider(provider);
-  const response = await apiClient(`/api/auth/oauth/${normalizedProvider}/link`, {
+async function refreshSessionApi() {
+  const response = await apiClient("/api/auth/refresh", {
     method: "POST",
-    body: { linkToken },
+    body: {},
+    includeAuth: false,
+    retryOnUnauthorized: false,
   });
 
   return unwrapResponse(response);
@@ -57,14 +40,6 @@ async function fetchKakaoAuthorizeUrlApi() {
 
 async function fetchGoogleAuthorizeUrlApi() {
   return fetchOAuthAuthorizeUrlApi("GOOGLE");
-}
-
-async function fetchKakaoLinkAuthorizeUrlApi() {
-  return fetchOAuthLinkAuthorizeUrlApi("KAKAO");
-}
-
-async function fetchKakaoOAuthResultApi({ resultKey }: { resultKey: string }) {
-  return fetchOAuthResultApi({ provider: "KAKAO", resultKey });
 }
 
 async function loginApi({ email, password }: { email: string; password: string }) {
@@ -145,26 +120,17 @@ async function logoutApi() {
   return unwrapResponse(response);
 }
 
-async function linkKakaoAccountApi({ linkToken }: { linkToken: string }) {
-  return linkOAuthAccountApi({ provider: "KAKAO", linkToken });
-}
-
 export {
   confirmPasswordResetApi,
   confirmEmailVerificationApi,
   fetchGoogleAuthorizeUrlApi,
   fetchKakaoAuthorizeUrlApi,
-  fetchKakaoLinkAuthorizeUrlApi,
-  fetchKakaoOAuthResultApi,
   fetchOAuthAuthorizeUrlApi,
-  fetchOAuthLinkAuthorizeUrlApi,
-  fetchOAuthResultApi,
   getMyInfoApi,
-  linkOAuthAccountApi,
-  linkKakaoAccountApi,
   loginApi,
   logoutApi,
   requestPasswordResetApi,
+  refreshSessionApi,
   sendEmailVerificationApi,
   signupApi,
 };

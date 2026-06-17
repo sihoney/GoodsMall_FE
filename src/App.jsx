@@ -4,8 +4,6 @@ import { Navigate } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import EmailVerificationPage from "./pages/auth/EmailVerificationPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
-import KakaoLinkRequiredPage from "./pages/auth/KakaoLinkRequiredPage";
-import KakaoOAuthCallbackPage from "./pages/auth/KakaoOAuthCallbackPage";
 import LoginPage from "./pages/auth/LoginPage";
 import OAuthCallbackPage from "./pages/auth/OAuthCallbackPage";
 import PasswordResetPage from "./pages/auth/PasswordResetPage";
@@ -73,13 +71,14 @@ const router = createBrowserRouter([
         element: <SignupPendingVerificationPage />,
       },
       { path: "email-verification", element: <EmailVerificationPage /> },
-      { path: "auth/kakao/callback", element: <KakaoOAuthCallbackPage /> },
+      {
+        path: "auth/kakao/callback",
+        element: <OAuthCallbackPage provider="KAKAO" />,
+      },
       {
         path: "auth/google/callback",
         element: <OAuthCallbackPage provider="GOOGLE" />,
       },
-      { path: "auth/oauth/link-required", element: <KakaoLinkRequiredPage /> },
-      { path: "auth/kakao/link-required", element: <KakaoLinkRequiredPage /> },
       { path: "cart", element: <CartPage /> },
       { path: "deposits", element: <DepositPage /> },
       { path: "withdrawals", element: <WithdrawalPage /> },
