@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { ApiError } from "../../api/client";
@@ -8,29 +8,16 @@ import Input from "../../components/common/Input";
 import {
   fetchGoogleAuthorizeUrlApi,
   fetchKakaoAuthorizeUrlApi,
-  linkOAuthAccountApi,
   sendEmailVerificationApi,
 } from "../../features/auth/authApi";
-import {
-  clearPendingKakaoLink,
-  getPendingKakaoLink,
-} from "../../features/auth/kakaoLinkStorage";
 import { useAuth } from "../../features/auth/useAuth";
 
-const PROVIDER_LABELS = {
-  KAKAO: "카카오",
-  GOOGLE: "Google",
-};
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login, loading } = useAuth();
-  const pendingKakaoLink = useMemo(() => getPendingKakaoLink(), []);
-  const pendingOAuthProvider = (pendingKakaoLink?.provider || "KAKAO").toUpperCase();
-  const pendingOAuthProviderLabel =
-    PROVIDER_LABELS[pendingOAuthProvider] || pendingOAuthProvider;
-  const initialEmail = searchParams.get("email") || pendingKakaoLink?.email || "";
+  const initialEmail = searchParams.get("email") || "";
   const redirectTarget = searchParams.get("redirect");
   const safeRedirectTarget =
     typeof redirectTarget === "string" && redirectTarget.startsWith("/")
@@ -109,14 +96,6 @@ export default function LoginPage() {
       setVerificationMessage("");
       await login(form);
 
-      if (pendingKakaoLink?.linkToken) {
-        await linkOAuthAccountApi({
-          provider: pendingOAuthProvider,
-          linkToken: pendingKakaoLink.linkToken,
-        });
-        clearPendingKakaoLink();
-      }
-
       navigate(safeRedirectTarget);
     } catch (error) {
       const isVerificationRequired =
@@ -126,15 +105,6 @@ export default function LoginPage() {
         setVerificationPending(true);
         setErrors({
           common: "로그인하려면 이메일 인증이 필요해요.",
-        });
-        return;
-      }
-
-      if (pendingKakaoLink?.linkToken) {
-        setErrors({
-          common:
-            error?.message ||
-            `로그인은 성공했지만 ${pendingOAuthProviderLabel} 계정 연동에 실패했어요. 다시 시도해 주세요.`,
         });
         return;
       }
@@ -205,18 +175,6 @@ export default function LoginPage() {
 
         <div className="w-full">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {pendingKakaoLink?.linkToken ? (
-              <div className="border border-yellow-200 bg-[#fff9d9] px-4 py-4 text-left text-sm text-[#5b4300]">
-                <p className="font-semibold">
-                  이 계정에 {pendingOAuthProviderLabel} 연동 대기 상태가 있어요.
-                </p>
-                <p className="mt-1">
-                  기존 계정으로 로그인하면 {pendingOAuthProviderLabel} 연동을 자동으로
-                  완료할게요.
-                </p>
-              </div>
-            ) : null}
-
             <div className="space-y-4">
               <FormField label="이메일 주소" htmlFor="email" error={errors.email}>
                 <Input

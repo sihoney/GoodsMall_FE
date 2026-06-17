@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { ApiError } from "../../api/client";
@@ -7,19 +7,16 @@ import CheckboxField from "../../components/common/CheckboxField";
 import FormField from "../../components/common/FormField";
 import Input from "../../components/common/Input";
 import { signupApi } from "../../features/auth/authApi";
-import { getPendingKakaoLink } from "../../features/auth/kakaoLinkStorage";
 import {
   presignProfileImageUploadApi,
   uploadProfileImageToS3,
 } from "../../features/member/memberApi";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-
 export default function SignupPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const pendingKakaoLink = useMemo(() => getPendingKakaoLink(), []);
-  const initialEmail = searchParams.get("email") || pendingKakaoLink?.email || "";
+  const initialEmail = searchParams.get("email") || "";
 
   const [form, setForm] = useState({
     name: "",
@@ -169,7 +166,7 @@ export default function SignupPage() {
             <div className="absolute inset-0 bg-blue-500/30 to-transparent" />
             <div className="relative z-10 space-y-4">
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-blue-700">
-                TodayLunch Market
+                투데이런치 마켓
               </span>
               <h2 className="text-5xl font-extrabold leading-[1.08] tracking-tighter">
                 오늘의 취향을
@@ -179,7 +176,7 @@ export default function SignupPage() {
                 점심 마켓
               </h2>
               <p className="max-w-xs font-medium text-gray-600">
-                마음에 드는 메뉴를 발견하고, 매일의 점심을 더 즐겁게 기록해 보세요.
+                마음에 드는 메뉴를 발견하고, 매일의 점심을 즐겁게 기록해 보세요.
               </p>
             </div>
           </section>
@@ -193,14 +190,6 @@ export default function SignupPage() {
             </div>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
-              {pendingKakaoLink?.linkToken ? (
-                <div className="border border-yellow-200 bg-[#fff9d9] px-4 py-4 text-left text-sm text-[#5b4300]">
-                  <p className="font-semibold">회원가입 후 카카오 계정을 연결할 수 있어요.</p>
-                  <p className="mt-1">
-                    먼저 회원가입을 완료한 뒤 로그인하면 카카오 계정 연결을 이어서 진행할 수 있어요.
-                  </p>
-                </div>
-              ) : null}
 
               <div className="space-y-4">
                 <FormField label="이름" htmlFor="name" required error={errors.name}>
@@ -261,7 +250,7 @@ export default function SignupPage() {
                     <Input
                       id="confirmPassword"
                       type="password"
-                      placeholder="비밀번호를 한 번 더 입력해 주세요"
+                      placeholder="비밀번호를 다시 입력해 주세요"
                       value={form.confirmPassword}
                       onChange={handleChange("confirmPassword")}
                       error={!!errors.confirmPassword}
